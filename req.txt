@@ -1,0 +1,7 @@
+slackeventsapi
+flask
+slack
+slackclient
+mysql-connector-python
+elo
+waitress
