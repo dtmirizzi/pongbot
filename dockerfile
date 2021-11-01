@@ -6,6 +6,8 @@ ARG MYSQL_HOST
 ARG MYSQL_USER
 ARG MYSQL_PASSWORD
 
+RUN export ENV="PROD"
+
 COPY . .
 
 RUN pip install -r req.txt
