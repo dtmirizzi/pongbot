@@ -15,11 +15,11 @@ pip install -r req.txt
 ```
 
 ``` 
-export SLACK_VERFICATION_KEY=""
-export SLACK_CLEINT_TOKEN=""
-export MYSQL_HOST=""
-export MYSQL_USER=""
-export MYSQL_PASSWORD="" 
+export SLACK_VERFICATION_KEY="<YOUR_SLACK_KEY>"
+export SLACK_CLEINT_TOKEN="<YOUR_SLACK_CLIENT_TOKEN>"
+export MYSQL_HOST="<YOUR_SQL_HOST>"
+export MYSQL_USER="<YOUR_SQL_USER>"
+export MYSQL_PASSWORD="<YOUR_SQL_PASSWORD>" 
 
 python main.py 
 ```
