@@ -2,8 +2,7 @@ from slack import WebClient
 import os
 from flask import Flask
 from slackeventsapi import SlackEventAdapter
-import string
-import time
+import math
 import re
 import mysql.connector
 from elo import rate_1vs1, setup
@@ -124,11 +123,11 @@ def beat(winner, looser, reprocess=False):
     # add to db
     curs.execute(
         "update pingpong.users set wins=wins+1, elo = %s where user_id = %s",
-        (int(winner_rank), winner),
+        (int(math.ceil(winner_rank)), winner),
     )
     curs.execute(
         "update pingpong.users set losses=losses+1, elo = %s where user_id = %s",
-        (int(looser_rank), looser),
+        (int(math.ceil(looser_rank)), looser),
     )
     if reprocess is False:
         curs.execute(
@@ -174,6 +173,8 @@ def leaderboard():
         "select user_id, wins, losses, elo from pingpong.users order by elo desc"
     )
     rows = curs.fetchall()
+    avg_elo = 0
+    games_played = 0
     results = []
     rank = 0
     prev_rank = sys.maxsize
@@ -181,12 +182,18 @@ def leaderboard():
         if u[3] < prev_rank:
             rank = rank + 1
             prev_rank = u[3]
+        avg_elo = avg_elo + u[3]
+        games_played = games_played + u[1]
         results.append(
             f"{rank}. <{u[0].upper()}> Wins:{u[1]} Losses: {u[2]} Elo: {u[3]}"
         )
     curs.close()
     pongdb.close()
-    return "\n".join(results)
+    if len(results>0):
+        avg_elo = avg_elo / len(results)
+    board = "\n".join(results)
+    board = board + f"\n Average Elo: {avg_elo} Games Played: {games_played} Fun Had: ∞"
+    return board
 
 
 if __name__ == "__main__":
