@@ -5,3 +5,5 @@ slackclient
 mysql-connector-python
 elo
 waitress
+black
+flake8

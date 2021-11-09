@@ -11,6 +11,12 @@ ngrok http 8080
 ```
 
 ```
+./init.sh
+
+source .venv/bin/activate
+```
+
+```
 pip install -r req.txt
 ```
 
