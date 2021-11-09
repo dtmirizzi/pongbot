@@ -2,7 +2,6 @@ from slack import WebClient
 import os
 from flask import Flask
 from slackeventsapi import SlackEventAdapter
-import math
 import re
 import mysql.connector
 from elo import rate_1vs1, setup
