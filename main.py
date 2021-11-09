@@ -33,7 +33,7 @@ table_qry = """create table if not exists pingpong.users (
   user_id varchar(255),
   wins int default 0,
   losses int default 0,
-  elo int default 400,
+  elo double default 400,
   PRIMARY KEY(user_id)
 );
 
@@ -123,11 +123,11 @@ def beat(winner, looser, reprocess=False):
     # add to db
     curs.execute(
         "update pingpong.users set wins=wins+1, elo = %s where user_id = %s",
-        (int(math.ceil(winner_rank)), winner),
+        winner_rank, winner),
     )
     curs.execute(
         "update pingpong.users set losses=losses+1, elo = %s where user_id = %s",
-        (int(math.ceil(looser_rank)), looser),
+        looser_rank, looser),
     )
     if reprocess is False:
         curs.execute(
@@ -185,7 +185,7 @@ def leaderboard():
         avg_elo = avg_elo + u[3]
         games_played = games_played + u[1]
         results.append(
-            f"{rank}. <{u[0].upper()}> Wins:{u[1]} Losses: {u[2]} Elo: {u[3]}"
+            f"{rank}. <{u[0].upper()}> Wins:{u[1]} Losses: {u[2]} Elo: {int(u[3])}"
         )
     curs.close()
     pongdb.close()
