@@ -46,15 +46,16 @@ create table if not exists pingpong.games (
 );
 """
 
-pongdb = mysql.connector.connect(
-    pool_name = "pingpool",
-    pool_size = 3,
-    host=os.environ["MYSQL_HOST"],
-    user=os.environ["MYSQL_USER"],
-    password=os.environ["MYSQL_PASSWORD"],
-)
+config = {
+    "host": os.environ["MYSQL_HOST"],
+    "user": os.environ["MYSQL_USER"],
+    "password": os.environ["MYSQL_PASSWORD"],
+}
 
-pongdb.cursor().execute(table_qry)
+conn = mysql.connector.connect(**config)
+with conn.cursor() as curs:
+    curs.execute(table_qry)
+conn.close()
 print(f"created pong table")
 
 
@@ -78,17 +79,19 @@ def message(payload):
                     text=f"<@{user_id}> Requested the leaderboard ```{leaderboard()} ```",
                 )
             elif any(x in text.lower() for x in beats_keys):
-                print(text.lower())
-                u = split(text)
-                print(u)
-                beat(u[0], u[1])
+                games = text.split(";")
+                for game in games:
+                    u = split(game.strip())
+                    beat(u[0], u[1])
             elif any(x in text.lower() for x in looses_keys):
-                u = split(text)
-                beat(u[1], u[0])
+                games = text.split(";")
+                for game in games:
+                    u = split(game.strip())
+                    beat(u[1], u[0])
             else:
                 client.chat_postMessage(
                     channel=event.get("channel"),
-                    text="Hey I didnt understand you, try `@PongBot @DT Beat @ME` or `@PongBot Leaderboard`. Please only one game at a time. ",
+                    text="Hey I didnt understand you, try `@PongBot @DT Beat @ME` or `@PongBot Leaderboard`. Please if you are crazy to can use a ; as a delimiter",
                 )
         except Exception as e:
             print(e)
@@ -104,6 +107,7 @@ def split(text):
 
 
 def beat(winner, looser, reprocess=False):
+    pongdb = mysql.connector.connect(**config)
     curs = pongdb.cursor()
     # get each user rank
     winner_rank = get_rank(curs, winner)
@@ -134,6 +138,7 @@ def beat(winner, looser, reprocess=False):
 
     pongdb.commit()
     curs.close()
+    pongdb.close()
 
 
 def get_rank(curs, user):
@@ -142,24 +147,28 @@ def get_rank(curs, user):
     if len(rows) == 0:
         # if we never seen the user b4 set their rank to 400
         curs.execute("insert into pingpong.users (user_id) values (%s)", (user,))
-        pongdb.commit()
         return 400
     return rows[0][0]
 
-@app.route("/reprocess_games")
+
 def reprocess_games():
     print("repo games...")
+    pongdb = mysql.connector.connect(**config)
     curs = pongdb.cursor()
     print("truncating user table")
     curs.execute("truncate table pingpong.users")
+    pongdb.commit()
     curs.execute("select winner, looser from pingpong.games")
     games = curs.fetchall()
     for game in games:
         beat(game[0], game[1], True)
     curs.close()
-    pass
+    pongdb.close()
+    return "{}"
+
 
 def leaderboard():
+    pongdb = mysql.connector.connect(**config)
     curs = pongdb.cursor()
     curs.execute(
         "select user_id, wins, losses, elo from pingpong.users order by elo desc"
@@ -176,12 +185,16 @@ def leaderboard():
             f"{rank}. <{u[0].upper()}> Wins:{u[1]} Losses: {u[2]} Elo: {u[3]}"
         )
     curs.close()
+    pongdb.close()
     return "\n".join(results)
 
 
 if __name__ == "__main__":
+    if os.environ["REPROCCESS"] == "TRUE":
+        reprocess_games()
     if os.environ["ENV"] == "PROD":
         from waitress import serve
+
         serve(app, host="0.0.0.0", port=8080)
     else:
         app.run(host="0.0.0.0", port=8080)
