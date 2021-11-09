@@ -47,13 +47,16 @@ create table if not exists pingpong.games (
 """
 
 pongdb = mysql.connector.connect(
+    pool_name = "pingpool",
+    pool_size = 3,
     host=os.environ["MYSQL_HOST"],
     user=os.environ["MYSQL_USER"],
     password=os.environ["MYSQL_PASSWORD"],
 )
 
-curs = pongdb.cursor().execute(table_qry)
+pongdb.cursor().execute(table_qry)
 print(f"created pong table")
+
 
 @app.route("/")
 def index():
@@ -143,6 +146,7 @@ def get_rank(curs, user):
         return 400
     return rows[0][0]
 
+@app.route("/reprocess_games")
 def reprocess_games():
     print("repo games...")
     curs = pongdb.cursor()
@@ -154,9 +158,6 @@ def reprocess_games():
         beat(game[0], game[1], True)
     curs.close()
     pass
-
-if os.environ["REPROCCESS"] == "TRUE":
-    reprocess_games()
 
 def leaderboard():
     curs = pongdb.cursor()
@@ -181,7 +182,6 @@ def leaderboard():
 if __name__ == "__main__":
     if os.environ["ENV"] == "PROD":
         from waitress import serve
-
         serve(app, host="0.0.0.0", port=8080)
     else:
         app.run(host="0.0.0.0", port=8080)
