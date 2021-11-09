@@ -190,7 +190,7 @@ def leaderboard():
 
 
 if __name__ == "__main__":
-    if os.environ["REPROCCESS"] == "TRUE":
+    if os.environ["REPROCESS"] == "TRUE":
         reprocess_games()
     if os.environ["ENV"] == "PROD":
         from waitress import serve
