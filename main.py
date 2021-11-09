@@ -123,11 +123,11 @@ def beat(winner, looser, reprocess=False):
     # add to db
     curs.execute(
         "update pingpong.users set wins=wins+1, elo = %s where user_id = %s",
-        winner_rank, winner),
+        winner_rank, winner,
     )
     curs.execute(
         "update pingpong.users set losses=losses+1, elo = %s where user_id = %s",
-        looser_rank, looser),
+        looser_rank, looser,
     )
     if reprocess is False:
         curs.execute(
