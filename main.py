@@ -192,7 +192,7 @@ def leaderboard():
     if len(results)>0:
         avg_elo = avg_elo / len(results)
     board = "\n".join(results)
-    board = board + f"\n Average Elo: {avg_elo} Games Played: {games_played} Fun Had: ∞"
+    board = board + f"\n Average Elo: {int(avg_elo)} Games Played: {games_played} Fun Had: ∞"
     return board
 
 
