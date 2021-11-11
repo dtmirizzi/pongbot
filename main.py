@@ -128,11 +128,11 @@ def beat(winner, looser, reprocess=False):
     # add 5 to each score for constant game inflation 
     curs.execute(
         "update pingpong.users set wins=wins+1, elo = %s where user_id = %s",
-        (float(winner_rank+5), winner),
+        (float(winner_rank+1), winner),
     )
     curs.execute(
         "update pingpong.users set losses=losses+1, elo = %s where user_id = %s",
-        (float(looser_rank+5), looser),
+        (float(looser_rank+1), looser),
     )
     if reprocess is False:
         curs.execute(
