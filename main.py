@@ -119,14 +119,20 @@ def beat(winner, looser, reprocess=False):
     if looser_rank < 100:
         looser_rank = 100
 
+    # defense is my best offence 
+    if winner == looser:
+        winner_rank = -420
+        looser_rank = -420
+
     # add to db
+    # add 5 to each score for constant game inflation 
     curs.execute(
         "update pingpong.users set wins=wins+1, elo = %s where user_id = %s",
-        (float(winner_rank), winner),
+        (float(winner_rank+5), winner),
     )
     curs.execute(
         "update pingpong.users set losses=losses+1, elo = %s where user_id = %s",
-        (float(looser_rank), looser),
+        (float(looser_rank+5), looser),
     )
     if reprocess is False:
         curs.execute(
