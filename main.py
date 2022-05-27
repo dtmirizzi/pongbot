@@ -210,6 +210,6 @@ if __name__ == "__main__":
     if os.environ["ENV"] == "PROD":
         from waitress import serve
 
-        serve(app, host="0.0.0.0", port=8080)
+        serve(app, host=os.environ["SERVICE_HOST"], port=os.environ["SERVICE_PORT"])
     else:
-        app.run(host="0.0.0.0", port=8080)
+        app.run(host=os.environ["SERVICE_HOST"], port=os.environ["SERVICE_PORT"])
